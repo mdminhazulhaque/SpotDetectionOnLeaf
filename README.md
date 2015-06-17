@@ -1,4 +1,4 @@
-# OpenCV_SpotDetectionOnLeaf
+# OpenCV Spot Detection on Leaf
 This program detects spots on leaf and counts them
 
 ## Screenshot ##
