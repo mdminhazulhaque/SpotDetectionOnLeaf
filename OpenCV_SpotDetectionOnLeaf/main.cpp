@@ -2,8 +2,8 @@
 //  main.cpp
 //  OpenCV_SpotDetectionOnLeaf
 //
-//  Created by Minhaz on 6/16/15.
-//  Copyright (c) 2015 Minhaz. All rights reserved.
+//  Created by Md. Minhazul Haque on 2015-06-16.
+//  Copyright (c) 2015 Md. Minhazul Haque. All rights reserved.
 //
 
 #include "opencv2/highgui/highgui.hpp"
@@ -16,14 +16,18 @@ using namespace std;
 int main()
 {
     Mat img_src = imread("/Users/minhaz/Leaf-Spot.jpg", CV_8S);
-    
+    //Mat img_src = imread("/Users/minhaz/Leaf-NoSpot.jpg", CV_8S);
+
+    // Convert image to gray and blur to remove noise
     Mat img_gray;
     cvtColor(img_src, img_gray, CV_BGR2GRAY);
     blur(img_gray, img_gray, Size(3,3));
     
+    // Apply canny effect with min threshold 100 and max 200
     Mat img_canny;
     Canny(img_gray, img_canny, 100, 200, 3);
     
+    // Apply contour detection
     vector<vector<Point> > contours;
     vector<Vec4i> hierarchy;
     findContours(img_canny, contours, hierarchy,
@@ -32,16 +36,21 @@ int main()
     const int spots_min = 10;
     int spots = 0;
     
+    // Clone the original image for drawing
     Mat img_result = img_src.clone();
     for(unsigned int i = 0; i< contours.size(); i++)
     {
+        // If contour contains more than 10 points
         if(contours.at(i).size() > 10)
         {
             RotatedRect rect = fitEllipse(contours.at(i));
+            
+            // Smaller area
             if(rect.boundingRect().area() < 500)
             {
                 spots++;
                 
+                // Draw image
                 Scalar color(0, 255, 255);
                 circle(img_result, rect.center, 5, color, 5, CV_AA);
             }
@@ -51,11 +60,14 @@ int main()
     stringstream str;
     Scalar fontColor;
     
+    // If spot count overloads threshold limit,
+    // Make the text color red
     if(spots >= spots_min)
     {
         fontColor = Scalar(0,0,255);
         str << "Infected " << spots << " spots";
     }
+    // Else make it green
     else
     {
         fontColor = Scalar(0,255,0);
